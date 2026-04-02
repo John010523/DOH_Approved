@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.doh_approvedherbalplantidentifcation"
+    namespace = "com.greenbuddy.doh_approvedherb_identifier"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.doh_approvedherbalplantidentifcation"
+        applicationId = "com.greenbuddy.doh_approvedherb_identifier"
         minSdk = 26 // <--- Change this value
         targetSdk = 36
         versionCode = 1
@@ -45,7 +45,7 @@ android {
 
 dependencies {
 
-    
+    implementation("androidx.cardview:cardview:1.0.0")
 
     implementation("androidx.core:core-splashscreen:1.0.1")
 

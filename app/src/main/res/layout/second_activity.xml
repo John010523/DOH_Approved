@@ -1,113 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/second"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#A7F3D0"
+    android:backgroundTint="@color/back"
+    android:backgroundTintMode="src_in">
 
     <FrameLayout
         android:id="@+id/fl"
-        android:layout_width="94dp"
-        android:layout_height="81dp"
-        android:layout_marginTop="22dp"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:background="@color/back"
+        app:layout_constraintBottom_toTopOf="@id/panel_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/front"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="77dp"
-            android:layout_gravity="center"
-            android:background="@drawable/f"
-            android:scaleType="fitCenter" />
+            android:layout_height="136dp"
+            android:background="@color/back"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="4dp">
 
+            <ImageView
+                android:id="@+id/front"
+                android:layout_width="77dp"
+                android:layout_height="77dp"
+                android:background="@drawable/f"
+                android:scaleType="fitCenter" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/hey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hey GreenBuddy"
+                    android:textColor="#065F46"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/heybud"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Let’s identify your herbal plant!"
+                    android:textColor="#1F2937"
+                    android:textSize="14sp"
+                    android:textStyle="normal" />
+
+            </LinearLayout>
+        </LinearLayout>
 
     </FrameLayout>
 
-    <TextView
-        android:id="@+id/hey"
-        android:layout_width="match_parent"
-        android:layout_height="20dp"
-        android:layout_marginStart="10dp"
-        android:gravity="start|center"
-        android:text="Hey GreenBuddy"
-        android:textColor="#C4339E37"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/panel_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.593" />
-
-    <TextView
-        android:id="@+id/heybud"
-        android:layout_width="match_parent"
-        android:layout_height="27dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="80dp"
-        android:gravity="start|center"
-        android:text="Let’s identify your herbal plant!"
-        android:textColor="#121212"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@id/panel_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.484" />
-
-    <LinearLayout
+    <androidx.cardview.widget.CardView
         android:id="@+id/panel_container"
         android:layout_width="match_parent"
-        android:layout_height="35dp"
-        android:layout_marginTop="15dp"
-        android:background="@drawable/grad_reverse"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="5dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="10dp"
+        android:background="#A7F3D0"
+        app:cardBackgroundColor="@color/back"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toTopOf="@+id/nestedScrollView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fl">
+        app:layout_constraintTop_toBottomOf="@id/fl">
 
-        <TextView
-            android:id="@+id/browsee"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="40dp"
-            android:background="@color/setactive"
-            android:clickable="true"
-            android:focusable="true"
-            android:padding="5dp"
-            android:text="Browse"
-            android:textColor="@color/black" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/panell"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:background="@color/white"
+            android:backgroundTint="@color/white"
+            android:backgroundTintMode="screen"
+            android:padding="5dp">
 
-        <TextView
-            android:id="@+id/saved"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="40dp"
-            android:padding="5dp"
-            android:text="Herb Saved"
-            android:textColor="@color/black"
-            android:textSize="13sp" />
+            <TextView
+                android:id="@+id/browsee"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="50dp"
+                android:background="@drawable/ative"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="5dp"
+                android:text="Browse"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/saved"
+                app:layout_constraintHorizontal_chainStyle="packed"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/saved"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/ative"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="5dp"
+                android:text="Herb Saved"
+                android:textColor="@color/black"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/browsee"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="1dp"
+        android:background="#A7F3D0"
         app:layout_constraintBottom_toTopOf="@id/included_panel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fl">
+        app:layout_constraintTop_toBottomOf="@id/panel_container">
 
 
         <GridLayout
@@ -115,8 +145,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
+            android:background="#A7F3D0"
+            android:backgroundTint="@color/back"
+            android:backgroundTintMode="multiply"
             android:columnCount="2"
-            android:padding="8dp">
+            android:padding="4dp">
 
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
@@ -138,13 +171,13 @@
                         android:src="@drawable/aa" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Akapulko"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -171,13 +204,13 @@
                         android:src="@drawable/am" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Ampalaya"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -204,13 +237,13 @@
                         android:src="@drawable/bb" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Bawang"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -237,13 +270,13 @@
                         android:src="@drawable/bayabas" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Bayabas"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -270,13 +303,13 @@
                         android:src="@drawable/lagundi" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Lagundi"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -303,13 +336,13 @@
                         android:src="@drawable/pp" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Pancit-pancitan"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -337,13 +370,13 @@
                         android:src="@drawable/nnnn" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Niyog-niyogan"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -370,13 +403,13 @@
                         android:src="@drawable/sambong" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Sambong"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -403,13 +436,13 @@
                         android:src="@drawable/tsts" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Tsaag-gubat"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -436,13 +469,13 @@
                         android:src="@drawable/yb" />
 
                     <TextView
+                        style="@style/PlantLabelStyle"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:padding="4dp"
                         android:text="Yerba-buena"
                         android:textColor="#FFFFFF"
-                        style="@style/PlantLabelStyle"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
@@ -452,19 +485,6 @@
         </GridLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/dark_mode_toggle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Dark Mode"
-        android:textSize="16sp"
-        android:textColor="#121212"
-        android:thumbTint="#63FF14"
-        app:trackTint="#D3D3D3"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="20dp" />
-
     <include
         android:id="@+id/included_panel"
         layout="@layout/universal_btn"
@@ -472,6 +492,4 @@
         android:layout_height="81dp"
         android:layout_marginBottom="30dp"
         app:layout_constraintBottom_toBottomOf="parent" />
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

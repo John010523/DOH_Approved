@@ -1,6 +1,5 @@
-package com.example.doh_approvedherbalplantidentifcation
-
-
+package com.greenbuddy.doh_approvedherb_identifier
+import androidx.cardview.widget.CardView
 import android.os.Looper
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,30 +12,28 @@ import androidx.activity.enableEdgeToEdge
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import android.animation.AnimatorInflater
-import android.content.Context
-import android.content.res.Configuration
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import android.graphics.Color
 import android.graphics.Rect
+import android.os.Environment
 import android.widget.AdapterView
 import android.os.Handler
+import android.os.StatFs
 import android.view.View
 import android.widget.AbsListView
 import android.widget.ArrayAdapter
 import android.widget.FrameLayout
-import android.widget.GridLayout
 import android.widget.ListView
+import android.widget.ProgressBar
 import android.widget.ScrollView
-import android.widget.SearchView
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.LayoutRes
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AlertDialog
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -46,9 +43,9 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.widget.NestedScrollView
-import com.example.doh_approvedherbalplantidentifcation.NextActivity.Companion.REQUEST_CAMERA_CAPTURE
-import com.example.doh_approvedherbalplantidentifcation.ml.HerbalRecognationSemifi
+import com.example.doh_approvedherbalplantidentifcation.HerbAdapter
+import com.example.doh_approvedherbalplantidentifcation.HerbModel
+import com.example.doh_approvedherbalplantidentifcation.SQLiteHelper
 import com.google.mlkit.vision.common.InputImage
 import java.io.ByteArrayOutputStream
 import org.tensorflow.lite.support.image.ImageProcessor
@@ -58,6 +55,10 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
+import com.greenbuddy.doh_approvedherb_identifier.NextActivity.Companion.REQUEST_CAMERA_CAPTURE
+import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalRecognationSemifi
+import java.io.File
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var continuebtn: Button
@@ -103,34 +104,10 @@ abstract class BaseActivity : AppCompatActivity() {
 
     // Changed to nullable or checked initialization to prevent "not initialized" crashes
     var btnhome: ImageButton? = null
-    var btnsave: ImageButton? = null
     var about: ImageButton? = null
     var scnherbs: ImageButton? = null
     var upload: ImageButton? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        val sharedPref = getSharedPreferences("Settings", Context.MODE_PRIVATE)
-        val isDarkMode = sharedPref.getBoolean("DarkMode", false)
-
-        // 2. Set the System Theme (for Status Bar/Icons)
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-        super.onCreate(savedInstanceState)
-        setContentView(layoutResourceId)
-    }
-    fun applyBackgroundColor(view: View) {
-        val sharedPref = getSharedPreferences("Settings", Context.MODE_PRIVATE)
-        val isDarkMode = sharedPref.getBoolean("Light Mode", false)
-
-        if (isDarkMode) {
-            view.setBackgroundColor(android.graphics.Color.parseColor("#121212"))
-        } else {
-            view.setBackgroundColor(android.graphics.Color.parseColor("#FFFFFF"))
-        }
-    }
+    var settings: ImageButton? = null
 
     protected fun setupNavigation() {
         // Safe lookups: if the ID doesn't exist in the current XML, it won't crash
@@ -138,6 +115,7 @@ abstract class BaseActivity : AppCompatActivity() {
         about = findViewById(R.id.aboutus)
         scnherbs = findViewById(R.id.scnherbs)
         upload = findViewById(R.id.upload)
+        settings = findViewById(R.id.setting)
 
         updateButtonSelection()
 
@@ -148,6 +126,19 @@ abstract class BaseActivity : AppCompatActivity() {
             // FIX: If we are already in ScannerActivity, do nothing!
             if (this !is ScannerActivity) {
                 navigateTo(ScannerActivity::class.java)
+            }
+        }
+        about?.setOnClickListener {
+            if (this !is AboutUs) {
+                navigateTo(AboutUs::class.java)
+            }
+        }
+        settings?.setOnClickListener {
+            if (this !is Setting) {
+                val intent = Intent(this, Setting::class.java)
+                // Optional: Pass a signal to show the card
+                intent.putExtra("SHOW_CARD", true)
+                startActivity(intent)
             }
         }
     }
@@ -168,6 +159,8 @@ abstract class BaseActivity : AppCompatActivity() {
         btnhome?.isSelected = (this is NextActivity)
         upload?.isSelected = (this is Classify)
         scnherbs?.isSelected = (this is ScannerActivity)
+        about?.isSelected = (this is AboutUs)
+        settings?.isSelected = (this is Setting)
     }
 }
 //second activity layout
@@ -211,32 +204,6 @@ class NextActivity : BaseActivity() { // CHANGED THIS
     }
     override fun onResume() {
         super.onResume()
-        // Call your permission check whenever the app comes to the foreground
-        val second = findViewById<View>(R.id.second) // Ensure your XML root has this ID
-        applyBackgroundColor(second)
-        val h = findViewById<TextView>(R.id.heybud)
-
-        val darkModeToggle = findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.dark_mode_toggle)
-
-        darkModeToggle.setOnCheckedChangeListener { _, isChecked ->
-            val sharedPref = getSharedPreferences("Settings", Context.MODE_PRIVATE)
-            val editor = sharedPref.edit()
-            editor.putBoolean("Dark Mode", isChecked)
-            editor.apply()
-
-            // 1. Manually change the colors WITHOUT recreate()
-            if (isChecked) {
-                second.setBackgroundColor(android.graphics.Color.parseColor("#121212"))
-                darkModeToggle.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
-                h.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
-                darkModeToggle.setText("Light Mode")
-            } else {
-                second.setBackgroundColor(android.graphics.Color.parseColor("#FFFFFF"))
-                darkModeToggle.setTextColor(android.graphics.Color.parseColor("#121212"))
-                h.setTextColor(android.graphics.Color.parseColor("#121212"))
-                darkModeToggle.setText("Dark Mode")
-            }
-        }
     }
 
 
@@ -335,10 +302,10 @@ class Category : BaseActivity()    {
                     category_background.visibility = View.VISIBLE
                     category_background2.visibility = View.GONE
                     herbalcategory.text = ""
-                    tit.visibility = View.INVISIBLE
-                    tit2.visibility = View.INVISIBLE
-                    tit3.visibility = View.INVISIBLE
-                    herbalspinner.adapter = adapterItemHerb // Set adapter for herbalspinner
+                    tit.visibility = View.GONE
+                    tit2.visibility = View.GONE
+                    tit3.visibility = View.GONE
+                    herbalspinner.adapter = adapterItemHerb
                     deseasespinner.visibility = View.GONE
                     deseasecategory.visibility = View.GONE
                 } else if (selectedItem.equals("Disease", ignoreCase = true)) {
@@ -389,7 +356,7 @@ class Category : BaseActivity()    {
 
                 when (herb) {
                     "Akapulko" -> {
-                        itemImage.setImageResource(R.drawable.akapulko)
+                        itemImage.setImageResource(R.drawable.aa)
                         defsv.visibility= View.VISIBLE
                         recommend.visibility= View.GONE
                         recommend2.visibility = View.GONE
@@ -401,7 +368,7 @@ class Category : BaseActivity()    {
                         category_background.visibility = View.GONE
                     }
                     "Ampalaya" -> {
-                        itemImage.setImageResource(R.drawable.ampalaya)
+                        itemImage.setImageResource(R.drawable.am)
                         defsv.visibility= View.VISIBLE
                         recommend.visibility= View.GONE
                         recommend2.visibility = View.GONE
@@ -449,7 +416,7 @@ class Category : BaseActivity()    {
                         category_background.visibility = View.GONE
                     }
                     "Niyog-Niyogan" -> {
-                        itemImage.setImageResource(R.drawable.niyog_niyogan)
+                        itemImage.setImageResource(R.drawable.nnnn)
                         defsv.visibility= View.VISIBLE
                         recommend.visibility= View.GONE
                         recommend2.visibility = View.GONE
@@ -461,7 +428,7 @@ class Category : BaseActivity()    {
                         category_background.visibility = View.GONE
                     }
                     "Pancit-Pancitan" -> {
-                        itemImage.setImageResource(R.drawable.pancit_pancitan)
+                        itemImage.setImageResource(R.drawable.pp)
                         defsv.visibility= View.VISIBLE
                         recommend.visibility= View.GONE
                         recommend2.visibility = View.GONE
@@ -485,7 +452,7 @@ class Category : BaseActivity()    {
                         category_background.visibility = View.GONE
                     }
                     "Tsaang-Gubat" -> {
-                        itemImage.setImageResource(R.drawable.tsaang_gubat)
+                        itemImage.setImageResource(R.drawable.tsts)
                         defsv.visibility= View.VISIBLE
                         recommend.visibility= View.GONE
                         recommend2.visibility = View.GONE
@@ -497,7 +464,7 @@ class Category : BaseActivity()    {
                         category_background.visibility = View.GONE
                     }
                     "Yerba Buena" -> {
-                        itemImage.setImageResource(R.drawable.yerba_buena)
+                        itemImage.setImageResource(R.drawable.yb)
                         defsv.visibility= View.VISIBLE
                         recommend.visibility= View.GONE
                         recommend2.visibility = View.GONE
@@ -552,7 +519,7 @@ class Category : BaseActivity()    {
                         recommend3.visibility= View.VISIBLE
                         recommend.setImageResource(R.drawable.ginger)
                         recommend2.setImageResource(R.drawable.chamomile)
-                        recommend3.setImageResource(R.drawable.tsaang_gubat)
+                        recommend3.setImageResource(R.drawable.tsts)
                         tit.setText("Ginger")
                         tit2.setText("Chamomile")
                         tit3.setText("Tsaang-Gubat")
@@ -565,7 +532,7 @@ class Category : BaseActivity()    {
                         recommend.visibility= View.VISIBLE
                         recommend2.visibility= View.VISIBLE
                         recommend3.visibility= View.VISIBLE
-                        recommend.setImageResource(R.drawable.yerba_buena)
+                        recommend.setImageResource(R.drawable.yb)
                         recommend2.setImageResource(R.drawable.feverfew)
                         recommend3.setImageResource(R.drawable.rosemary)
                         tit.setText("Yerba Buena")
@@ -689,7 +656,6 @@ class HerbActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        applyBackgroundColor(findViewById(R.id.herb_list))
     }
 
 }
@@ -805,6 +771,23 @@ class Classify : BaseActivity() {
 
         Save.setOnClickListener {
             saveCurrentResult()
+        }
+
+        // Inside Classify.kt onCreate
+
+        val plantNameExtra = intent.getStringExtra("PLANT_NAME")
+        if (byteArray != null) {
+            val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+            Imgcapture.setImageBitmap(bitmap)
+            Imgcapture.visibility = View.VISIBLE
+
+            // If we passed a name from the scanner, display it and run prediction automatically
+            if (plantNameExtra != null) {
+                Imglabel.text = plantNameExtra
+                // Since we already have the bitmap, we can run prediction to fill
+                // Description, Safety, and Preparation immediately
+                runPrediction(bitmap)
+            }
         }
 
     }
@@ -1063,28 +1046,36 @@ class Classify : BaseActivity() {
 
 }
 // Real-Time Scanner
-// Change AppCompatActivity to BaseActivity
 class ScannerActivity : BaseActivity() {
 
     private lateinit var Scan: ImageButton
     private lateinit var Prev: PreviewView
     private lateinit var Txtres: TextView
     private lateinit var view: View
+    private lateinit var bottomCard: androidx.cardview.widget.CardView
+    private lateinit var plantName: TextView
+    private lateinit var plantImage: ImageView
     private lateinit var herbalModel: HerbalRecognationSemifi
     private lateinit var objectDetector: com.google.mlkit.vision.objects.ObjectDetector
     private var herbalLabels: List<String> = emptyList()
 
-    // Added your requested override variable
+    // Flag to handle the 3-second pause
+    private var isProcessingPaused = false
+
     override val layoutResourceId: Int = R.layout.viewfinder
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.viewfinder)
 
         setupNavigation()
-
         setupHerbalModel()
         loadLabels()
 
+        bottomCard = findViewById(R.id.bottomCard)
+        bottomCard.visibility = View.GONE
+        plantName = findViewById(R.id.cardlabel) // Give your Card's Title TextView an ID in XML
+        plantImage = findViewById(R.id.cardIm)
         Scan = findViewById<ImageButton>(R.id.Scan)
         Prev = findViewById<PreviewView>(R.id.Prev)
         Txtres = findViewById<TextView>(R.id.Txtres)
@@ -1092,8 +1083,30 @@ class ScannerActivity : BaseActivity() {
 
         Scan.setOnClickListener {
             checkCameraPermission()
+        }
 
+        bottomCard.setOnClickListener {
+            // 1. Get the current bitmap from the ImageView
+            val drawable = plantImage.drawable as? android.graphics.drawable.BitmapDrawable
+            val bitmap = drawable?.bitmap
 
+            if (bitmap != null) {
+                val intent = Intent(this, Classify::class.java)
+
+                // 2. Pass the Plant Name (Label)
+                intent.putExtra("PLANT_NAME", plantName.text.toString())
+
+                // 3. Compress Image to ByteArray
+                val stream = java.io.ByteArrayOutputStream()
+                // Use JPEG and 80% quality to avoid "TransactionTooLargeException"
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
+                val byteArray = stream.toByteArray()
+                intent.putExtra("capturedImage", byteArray)
+
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "No image captured yet", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -1112,7 +1125,6 @@ class ScannerActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Call your permission check whenever the app comes to the foreground
         checkCameraPermission()
     }
 
@@ -1141,7 +1153,11 @@ class ScannerActivity : BaseActivity() {
                 .build()
 
             imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this)) { imageProxy ->
-                processImageProxy(imageProxy)
+                if (isProcessingPaused) {
+                    imageProxy.close()
+                } else {
+                    processImageProxy(imageProxy)
+                }
             }
 
             try {
@@ -1150,7 +1166,6 @@ class ScannerActivity : BaseActivity() {
             } catch (exc: Exception) {
                 Log.e("Scanner", "Use case binding failed", exc)
             }
-            setupNavigation()
         }, ContextCompat.getMainExecutor(this))
     }
 
@@ -1170,13 +1185,11 @@ class ScannerActivity : BaseActivity() {
                         Txtres.setTextColor(Color.WHITE)
                         view.alpha = 0.5f
                     }
-                    imageProxy.close()
                     return@addOnSuccessListener
                 }
 
                 for (detectedObject in objects) {
                     val boundingBox = detectedObject.boundingBox
-
                     val isRotated = rotation == 90 || rotation == 270
                     val frameWidth = if (isRotated) imageProxy.height.toFloat() else imageProxy.width.toFloat()
                     val frameHeight = if (isRotated) imageProxy.width.toFloat() else imageProxy.height.toFloat()
@@ -1193,7 +1206,6 @@ class ScannerActivity : BaseActivity() {
 
                     if (targetBoxInImage.contains(boundingBox.centerX(), boundingBox.centerY())) {
                         runOnUiThread { view.alpha = 1.0f }
-
                         val fullBitmap = Prev.bitmap
                         if (fullBitmap != null) {
                             val bitmapScaleX = fullBitmap.width.toFloat() / frameWidth
@@ -1218,50 +1230,7 @@ class ScannerActivity : BaseActivity() {
                     }
                 }
             }
-            .addOnFailureListener { imageProxy.close() }
             .addOnCompleteListener { imageProxy.close() }
-    }
-
-    private fun updateTargetBoxToCenter() {
-        runOnUiThread {
-            val size = (Prev.width * 0.75).toInt()
-
-            if (view.layoutParams.width != size) {
-                val params = view.layoutParams
-                params.width = size
-                params.height = size
-                view.layoutParams = params
-                view.setBackgroundResource(R.drawable.scanner_design)
-            }
-
-            val centerX = (Prev.width / 2f) - (size / 2f)
-            val centerY = (Prev.height / 2f) - (size / 2f)
-
-            view.x = Prev.left + centerX
-            view.y = Prev.top + centerY
-
-            view.visibility = View.VISIBLE
-        }
-    }
-
-    fun cropBitmap(source: Bitmap, rect: Rect): Bitmap {
-        val left = rect.left.coerceIn(0, source.width - 1)
-        val top = rect.top.coerceIn(0, source.height - 1)
-        val width = rect.width().coerceAtMost(source.width - left)
-        val height = rect.height().coerceAtMost(source.height - top)
-
-        return if (width > 10 && height > 10) {
-            Bitmap.createBitmap(source, left, top, width, height)
-        } else source
-    }
-
-    private fun loadLabels() {
-        try {
-            val inputStream = assets.open("label.txt")
-            herbalLabels = inputStream.bufferedReader().readLines().filter { it.isNotBlank() }
-        } catch (e: Exception) {
-            Log.e("Scanner", "Error: ${e.message}")
-        }
     }
 
     private fun runHerbalModel(bitmap: Bitmap) {
@@ -1292,15 +1261,251 @@ class ScannerActivity : BaseActivity() {
                     if (detectedLabel.contains("Invalid!", ignoreCase = true)) {
                         Txtres.text = "Invalid: Not a recognized plant"
                         Txtres.setTextColor(Color.RED)
+                        bottomCard.visibility = View.GONE
                     } else {
+                        // VALID PLANT - Pause Processing and Camera
+                        isProcessingPaused = true
+
+                        // Unbind camera to freeze the preview
+                        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+                        val cameraProvider = cameraProviderFuture.get()
+                        cameraProvider.unbindAll()
+
                         Txtres.text = "$detectedLabel (${(confidence * 100).toInt()}%)"
                         Txtres.setTextColor(Color.GREEN)
+
+                        bottomCard.visibility = View.VISIBLE
+                        plantImage.setImageBitmap(bitmap)
+                        plantName.text = detectedLabel
+
+                        // Wait 3 seconds, then restart camera and analysis
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            isProcessingPaused = false
+                            startCamera() // Restart camera feed
+                            Txtres.text = "Analyzing..."
+                            Txtres.setTextColor(Color.CYAN)
+                            bottomCard.visibility = View.GONE
+
+                        }, 3000)
                     }
                 } else {
                     Txtres.text = "Analyzing..."
                     Txtres.setTextColor(Color.CYAN)
+                    bottomCard.visibility = View.GONE
+                    isProcessingPaused = false
+                    startCamera()
                 }
             }
         }
+    }
+
+    private fun updateTargetBoxToCenter() {
+        runOnUiThread {
+            val size = (Prev.width * 0.75).toInt()
+            if (view.layoutParams.width != size) {
+                val params = view.layoutParams
+                params.width = size
+                params.height = size
+                view.layoutParams = params
+                view.setBackgroundResource(R.drawable.scanner_design)
+            }
+            view.x = Prev.left + (Prev.width / 2f) - (size / 2f)
+            view.y = Prev.top + (Prev.height / 2f) - (size / 2f)
+            view.visibility = View.VISIBLE
+        }
+    }
+
+    fun cropBitmap(source: Bitmap, rect: Rect): Bitmap {
+        val left = rect.left.coerceIn(0, source.width - 1)
+        val top = rect.top.coerceIn(0, source.height - 1)
+        val width = rect.width().coerceAtMost(source.width - left)
+        val height = rect.height().coerceAtMost(source.height - top)
+        return if (width > 10 && height > 10) {
+            Bitmap.createBitmap(source, left, top, width, height)
+        } else source
+    }
+
+    private fun loadLabels() {
+        try {
+            val inputStream = assets.open("label.txt")
+            herbalLabels = inputStream.bufferedReader().readLines().filter { it.isNotBlank() }
+        } catch (e: Exception) {
+            Log.e("Scanner", "Error loading labels: ${e.message}")
+        }
+    }
+}
+
+class AboutUs : BaseActivity() {
+
+    // Add this line to satisfy the abstract requirement
+    override val layoutResourceId: Int = R.layout.aboutus // Ensure 'about_us' matches your XML filename
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.aboutus)
+
+        setupNavigation()
+    }
+}
+
+class Setting : BaseActivity(){
+    override val layoutResourceId: Int = R.layout.universal_btn
+
+    private lateinit var dbHelper: SQLiteHelper
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+        setContentView(R.layout.universal_btn)
+
+        dbHelper = SQLiteHelper(this)
+
+        val card = findViewById<CardView>(R.id.contentCard1)
+        val cardm = findViewById<CardView>(R.id.mainCards)
+        val shouldShow = intent.getBooleanExtra("SHOW_CARD", false)
+        if (shouldShow) {
+            cardm.visibility = View.VISIBLE
+        } else {
+            card.visibility = View.GONE
+        }
+
+        val btnClear = findViewById<Button>(R.id.btnClearData)
+
+        btnClear.setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Delete All Data & Cache?")
+                .setMessage("This will erase all saved plants and clear temporary files. This action cannot be undone.")
+                .setPositiveButton("Clear All") { _, _ ->
+                    // 1. Clear Database Data
+                    val isCleared = dbHelper.clearAllHerbs()
+
+                    // 2. Clear App Cache Files
+                    val cacheCleared = clearAppCache()
+
+                    if (isCleared || cacheCleared) {
+                        Toast.makeText(this, "Data and Cache cleared", Toast.LENGTH_SHORT).show()
+                        // Refresh UI to show 0.00 MB
+                        updateStorageUI()
+                        updateStorageDetails()
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
+
+        setupNavigation()
+        updateStorageUI()
+        updateStorageDetails()
+
+
+    }
+    override fun onResume() {
+        super.onResume()
+        // Refresh every time the user sees this screen
+        updateStorageUI()
+        updateStorageDetails()
+    }
+
+    private fun clearAppCache(): Boolean {
+        return try {
+            val dir = cacheDir
+            dir.deleteRecursively()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+    private fun updateStorageUI() {
+        val count = dbHelper.getSavedPlantsCount() // Now returns unique count
+        val maxPlants = 10
+        val percentage = (count.toFloat() / maxPlants * 100).toInt()
+
+        val progressBar = findViewById<ProgressBar>(R.id.plantProgressBar)
+        val tvPercentage = findViewById<TextView>(R.id.tvPercentage)
+        val tvSavedCount = findViewById<TextView>(R.id.tvSavedCount)
+
+        progressBar?.progress = count
+        tvPercentage?.text = "$percentage%"
+
+        // Updated text to reflect "Unique Species"
+        tvSavedCount?.text = "$count of $maxPlants species identified"
+    }
+    private fun updateStorageDetails() {
+        //Model Storage consumed
+        val modelFileName = "Herbal_Recognation_Semifi.tflite"
+        val tvModelSize = findViewById<TextView>(R.id.tvModelSize)
+        try {
+
+            val fileDescriptor = assets.openFd(modelFileName)
+            val sizeInBytes = fileDescriptor.length
+            val sizeInMB = sizeInBytes / (1024.0 * 1024.0)
+
+            tvModelSize?.text = String.format("Model Size: %.2f MB", sizeInMB)
+            fileDescriptor.close()
+        } catch (e: Exception) {
+            tvModelSize?.text = "Model Size: Unknown"
+            e.printStackTrace()
+        }
+
+        //App or Overall Storage consumed
+        val appDataSize = getFolderSize(dataDir)
+
+        // 2. Get APK Size (The size of the app installed from the store)
+        val apkFile = File(packageCodePath)
+        val apkSize = if (apkFile.exists()) apkFile.length() else 0L
+
+        // 3. Total App Size
+        val totalAppSizeInBytes = appDataSize + apkSize
+        val totalAppSizeInMB = totalAppSizeInBytes / (1024.0 * 1024.0)
+
+        val tvAppStorage = findViewById<TextView>(R.id.tvAppSize)
+        tvAppStorage?.text = String.format("App Size: %.2f MB", totalAppSizeInMB)
+
+
+        //Saved Plants Consumed
+        val dbFile = getDatabasePath("HerbalPlants.db")
+        val dbSizeInBytes = if (dbFile.exists()) dbFile.length() else 0L
+        val dbSizeInMB = dbSizeInBytes / (1024.0 * 1024.0)
+
+        val tvDatabaseSize = findViewById<TextView>(R.id.tvDatabaseSize)
+        tvDatabaseSize?.text = String.format("Saved Plants Data: %.2f MB", dbSizeInMB)
+
+        // 2. Get Phone Internal Storage
+        val path = Environment.getDataDirectory()
+        val stat = StatFs(path.path)
+        val blockSize = stat.blockSizeLong
+        val totalBlocks = stat.blockCountLong
+        val availableBlocks = stat.availableBlocksLong
+
+        // Calculate in Double first to avoid rounding to zero
+        val totalMB = (totalBlocks * blockSize).toDouble() / (1024 * 1024)
+        val availableMB = (availableBlocks * blockSize).toDouble() / (1024 * 1024)
+        val usedMB = totalMB - availableMB
+
+        // Convert to GB for the text display
+        val totalGB = totalMB / 1024.0
+        val usedGB = usedMB / 1024.0
+
+        val tvDeviceStorage = findViewById<TextView>(R.id.tvDeviceStorage)
+        val deviceStorageBar = findViewById<ProgressBar>(R.id.deviceStorageBar)
+
+        // Displaying with 1 decimal place (e.g., 12.5 GB of 64.0 GB)
+        tvDeviceStorage?.text = String.format("Phone Storage: %.1f GB used of %.1f GB", usedGB, totalGB)
+
+        // Use MB for the progress bar to ensure smooth accuracy
+        deviceStorageBar?.max = totalMB.toInt()
+        deviceStorageBar?.progress = usedMB.toInt()
+    }
+    private fun getFolderSize(file: File): Long {
+        var size: Long = 0
+        if (file.exists() && file.isDirectory) {
+            file.listFiles()?.forEach { child ->
+                size += if (child.isDirectory) getFolderSize(child) else child.length()
+            }
+        } else if (file.exists()) {
+            size = file.length()
+        }
+        return size
     }
 }

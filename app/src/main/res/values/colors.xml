@@ -2,6 +2,7 @@
 <resources>
         <color name="black">#FF000000</color>
         <color name="white">#FFFFFFFF</color>
+        <color name="back">#A7F3D0</color>
         <color name="selectedColor">#D0F0C0</color> <!-- Light green highlight -->
         <color name="activeItemColor">#63FF14</color> <!-- Light green -->
         <color name="gray">#7C8E8B8B</color>

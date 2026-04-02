@@ -152,4 +152,33 @@ class SQLiteHelper(context: Context) :
         db.close()
         return result > 0
     }
+    fun clearAllHerbs(): Boolean {
+        val db = this.writableDatabase
+        return try {
+            // Passing null to whereClause deletes all rows
+            val result = db.delete(TABLE_NAME, null, null)
+            db.close()
+            result >= 0
+        } catch (e: Exception) {
+            Log.e("SQLiteHelper", "Error clearing table: ${e.message}")
+            false
+        }
+    }
+
+
+    fun getSavedPlantsCount(): Int {
+        val db = this.readableDatabase
+        // DISTINCT ensures "Lagundi" is only counted once, no matter how many entries exist
+        val query = "SELECT COUNT(DISTINCT $COL_NAME) FROM $TABLE_NAME"
+        val cursor = db.rawQuery(query, null)
+
+        var count = 0
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0)
+        }
+
+        cursor.close()
+        db.close()
+        return count
+    }
 }

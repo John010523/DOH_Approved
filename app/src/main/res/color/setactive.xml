@@ -1,6 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true" android:color="@color/activeItemColor" />
-    <item android:state_selected="true" android:color="@color/activeItemColor" />
-    <item android:color="#00FFFFFF" />
+
+    <item android:state_pressed="true" android:color="@color/activeItemColor">
+        <shape android:shape="oval">
+            <solid android:color="@color/activeItemColor" />
+            <corners android:radius="100dp" />
+            <padding
+                android:left="15dp"
+                android:right="15dp"
+                android:top="5dp"
+                android:bottom="5dp" />
+        </shape>
+    </item>
+
+    <item android:state_selected="true" android:color="@color/activeItemColor">
+        <shape android:shape="oval">
+            <solid android:color="@color/activeItemColor" />
+            <corners android:radius="100dp" />
+            <padding
+                android:left="15dp"
+                android:right="15dp"
+                android:top="5dp"
+                android:bottom="5dp" />
+        </shape>
+    </item>
+
+    <item android:color="#00FFFFFF">
+        <shape android:shape="oval">
+            <solid android:color="#00FFFFFF" />
+            <corners android:radius="100dp" />
+        </shape>
+    </item>
+
 </selector>

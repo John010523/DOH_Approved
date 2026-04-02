@@ -36,7 +36,7 @@
     <style name="Theme.DOHApprovedHerbalPlantIdentifcation" parent="Base.Theme.DOHApprovedHerbalPlantIdentifcation" />
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
+        <item name="windowSplashScreenBackground">@color/back</item>
 
         <item name="windowSplashScreenAnimatedIcon">@drawable/loading</item>
 

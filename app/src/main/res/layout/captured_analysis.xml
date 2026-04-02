@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cap"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFEFE">
+    android:background="#A7F3D0">
 
     <Button
         android:id="@+id/donebtn"
@@ -22,7 +21,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.046" />
-
 
 
     <Button
@@ -47,16 +45,16 @@
         android:layout_height="550dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="20dp"
+        android:fadeScrollbars="false"
+        android:fadingEdgeLength="40dp"
+        android:requiresFadingEdge="vertical"
+        android:scrollbarThumbVertical="@android:color/black"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.370"
-        android:scrollbars="vertical"
-        android:fadeScrollbars="false"
-        android:scrollbarThumbVertical="@android:color/black"
-        android:requiresFadingEdge="vertical"
-        android:fadingEdgeLength="40dp">
+        app:layout_constraintVertical_bias="0.370">
 
         <!-- Use a LinearLayout inside ScrollView for stacking elements vertically -->
         <LinearLayout
@@ -204,8 +202,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center"
+                android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -216,26 +214,26 @@
                     android:id="@+id/scanagain"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#3F51B5"
                     android:text="Scan"
-                    android:textColor="@color/white"
-                    android:backgroundTint="#3F51B5" />
+                    android:textColor="@color/white" />
 
                 <Button
                     android:id="@+id/uploadbttn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="8dp"
+                    android:backgroundTint="#3F51B5"
                     android:text="Upload"
-                    android:textColor="@color/white"
-                    android:backgroundTint="#3F51B5" />
+                    android:textColor="@color/white" />
 
                 <Button
                     android:id="@+id/classify"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:backgroundTint="#3F51B5"
                     android:text="Classify"
-                    android:textColor="@color/white"
-                    android:backgroundTint="#3F51B5" />
+                    android:textColor="@color/white" />
 
             </LinearLayout>
 
@@ -252,8 +250,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
