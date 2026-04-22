@@ -1,7 +1,8 @@
 Akapulko
+Invalid
 Lagundi
-Niyog-Niyogan
-Invalid!
-Pansit_Pansitan
+Niyog-niyogan
+Pancit-pancitan
 Sambong
-Yerba_Buena
+Tsaang-gubat
+Yerba-buena

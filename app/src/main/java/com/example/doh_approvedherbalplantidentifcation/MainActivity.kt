@@ -1,6 +1,8 @@
 package com.greenbuddy.doh_approvedherb_identifier
 import androidx.cardview.widget.CardView
 import android.os.Looper
+import com.google.mlkit.vision.objects.ObjectDetection
+import java.util.concurrent.Executors
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -38,6 +40,7 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.impl.Identifier
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
@@ -56,8 +59,15 @@ import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 import com.greenbuddy.doh_approvedherb_identifier.NextActivity.Companion.REQUEST_CAMERA_CAPTURE
-import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalRecognationSemifi
+//import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalRecognationSemifi
+//import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalModel
+//import com.greenbuddy.doh_approvedherb_identifier.ml.Greenbuddy
+//import com.greenbuddy.doh_approvedherb_identifier.ml.Model
+import com.greenbuddy.doh_approvedherb_identifier.ml.ModelUnquant
+
 import java.io.File
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 class MainActivity : AppCompatActivity() {
 
@@ -121,7 +131,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
         // Only set listeners if the buttons actually exist in the layout
         btnhome?.setOnClickListener { navigateTo(NextActivity::class.java) }
-        upload?.setOnClickListener { navigateTo(Classify::class.java) }
+        upload?.setOnClickListener { navigateTo(Classify::class.java)
+            Toast.makeText(this, "Swipe Down!", Toast.LENGTH_SHORT).show()}
         scnherbs?.setOnClickListener {
             // FIX: If we are already in ScannerActivity, do nothing!
             if (this !is ScannerActivity) {
@@ -674,7 +685,6 @@ class Classify : BaseActivity() {
     private lateinit var Imglabel: TextView
     private lateinit var Up: Button
     private lateinit var Donebtn: Button
-    private lateinit var Scanagain: Button
     private lateinit var Save: Button
     private lateinit var Desc: TextView
     private lateinit var Safe: TextView
@@ -700,11 +710,9 @@ class Classify : BaseActivity() {
         Imglabel = findViewById(R.id.label)
         Save = findViewById(R.id.savebutton)
         Up = findViewById(R.id.uploadbttn)
-        Up.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4D47E9"))
+        Up.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#A7F3D0"))
         classification = findViewById(R.id.classify)
-        classification.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4D47E9"))
-        Scanagain = findViewById(R.id.scanagain)
-        Scanagain.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4D47E9"))
+        classification.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#A7F3D0"))
         Donebtn = findViewById(R.id.donebtn)
         Desc = findViewById(R.id.descriptionlabel)
         labelsafe = findViewById(R.id.safe)
@@ -764,10 +772,6 @@ class Classify : BaseActivity() {
             startActivity(intent)
             finish()
         }
-        Scanagain.setOnClickListener {
-            val intent = Intent(this, ScannerActivity::class.java)
-            startActivity(intent)
-        }
 
         Save.setOnClickListener {
             saveCurrentResult()
@@ -820,6 +824,15 @@ class Classify : BaseActivity() {
 
     //  Run Classification tima pag deploy san model
     private fun runPrediction(bitmap: Bitmap) {
+        // 1. DECLARE THE CORRECT SIZE HERE
+        val modelInputSize = 224
+
+        val dimension = Math.min(bitmap.width, bitmap.height)
+        val centerCroppedBitmap = Bitmap.createBitmap(bitmap, (bitmap.width - dimension) / 2, (bitmap.height - dimension) / 2, dimension, dimension)
+        val scaledBitmap = Bitmap.createScaledBitmap(centerCroppedBitmap, modelInputSize, modelInputSize, true)
+        Imgcapture.setImageBitmap(scaledBitmap)
+
+
         // Load labels from assets
         val labelList = assets.open("label.txt")
             .bufferedReader()
@@ -827,11 +840,11 @@ class Classify : BaseActivity() {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
 
-        val model = HerbalRecognationSemifi.newInstance(this)
+        val model = ModelUnquant.newInstance(this)
 
-        // Preprocess image
+        // 2. Preprocess image - CHANGE 180 TO modelInputSize (160)
         val imageProcessor = ImageProcessor.Builder()
-            .add(ResizeOp(180, 180, ResizeOp.ResizeMethod.BILINEAR))
+            .add(ResizeOp(modelInputSize, modelInputSize, ResizeOp.ResizeMethod.BILINEAR))
             .add(NormalizeOp(0f, 1f))
             .build()
 
@@ -839,28 +852,30 @@ class Classify : BaseActivity() {
         tensorImage.load(bitmap)
         tensorImage = imageProcessor.process(tensorImage)
 
+        // 3. Create TensorBuffer - CHANGE 180 TO modelInputSize (160)
         val inputFeature0 = TensorBuffer.createFixedSize(
-            intArrayOf(1, 180, 180, 3), DataType.FLOAT32
+            intArrayOf(1, modelInputSize, modelInputSize, 3), DataType.FLOAT32
         )
         inputFeature0.loadBuffer(tensorImage.buffer)
 
-        //  Run model
+        // Run model
         val outputs = model.process(inputFeature0)
         val outputFeature0 = outputs.outputFeature0AsTensorBuffer.floatArray
 
-        //  Apply softmax
+        // Apply scores (probabilities)
         val probabilities = outputFeature0
 
-        // 🔎 Log all class scores
+        // Log all class scores for debugging
         probabilities.forEachIndexed { idx, prob ->
             val name = labelList.getOrNull(idx) ?: "Class $idx"
             Log.d("MODEL_OUTPUT", "$name: ${"%.4f".format(prob)}")
         }
 
-        //  Find top prediction
+        // Find top prediction
         val maxIndex = probabilities.indices.maxByOrNull { probabilities[it] }
         val maxProb = maxIndex?.let { probabilities[it] } ?: 0f
-        val confidenceThreshold = 0.3f  // Lower for testing
+        val confidenceThreshold = 0.3f
+
         val predictedLabel = if (maxProb >= confidenceThreshold &&
             maxIndex != null &&
             maxIndex in labelList.indices) {
@@ -869,6 +884,7 @@ class Classify : BaseActivity() {
             "Invalid"
         }
 
+        // Preparation, Description, and Safety Warning Logic
         preparation = when (predictedLabel) {
             "Akapulko" -> "📝 Boil leaves and apply the decoction on affected skin areas twice daily for fungal infections."
             "Ampalaya" -> "📝 Boil the leaves or fruit and drink the decoction twice a day to help manage blood sugar."
@@ -882,7 +898,6 @@ class Classify : BaseActivity() {
             "Yerba_Buena" -> "📝 Boil leaves and drink as tea for headaches or stomach pain, or use as a mouthwash."
             else -> "📝 No preparation details available."
         }
-
 
         description = when (predictedLabel) {
             "Akapulko" -> "📖 Known for its antifungal properties — used to treat ringworm, scabies, and eczema."
@@ -898,7 +913,6 @@ class Classify : BaseActivity() {
             else -> "📖 No description available."
         }
 
-
         safety_warning = when (predictedLabel) {
             "Akapulko" -> "⚠️ For external use only. Avoid contact with eyes and open wounds. Prolonged use may cause skin irritation."
             "Ampalaya" -> "⚠️ Not recommended for pregnant women or people taking diabetes medication without medical advice."
@@ -913,44 +927,32 @@ class Classify : BaseActivity() {
             else -> "⚠️ No safety warning available. Consult a healthcare professional before use."
         }
 
-
-        val label = if (maxProb >= confidenceThreshold &&
-            maxIndex != null &&
-            maxIndex in labelList.indices) {
-            labelList[maxIndex]
+        // UI Updates
+        if (predictedLabel == "Invalid") {
+            Imglabel.setTextColor(Color.RED)
+            Imglabel.text = predictedLabel
+            Desc.visibility = View.GONE
+            Safe.visibility = View.GONE
+            labeldesc.visibility = View.GONE
+            labelsafe.visibility = View.GONE
+            preplbl.visibility = View.GONE
+            prepar.visibility = View.GONE
+            name.visibility = View.GONE
         } else {
-            "Invalid"
+            Imglabel.setTextColor(Color.BLACK)
+            val confidenceText = "%.2f".format(maxProb * 100)
+            Imglabel.text = "$predictedLabel (Confidence: $confidenceText%)"
+            Desc.visibility = View.VISIBLE
+            Safe.visibility = View.VISIBLE
+            labeldesc.visibility = View.VISIBLE
+            labelsafe.visibility = View.VISIBLE
+            prepar.visibility = View.VISIBLE
+            preplbl.visibility = View.VISIBLE
+            name.visibility = View.VISIBLE
+            labeldesc.text = description
+            Safe.text = safety_warning
+            preplbl.text = preparation // Corrected variable binding
         }
-
-        // change color and display label
-            if (label == "Invalid!") {
-                Imglabel.setTextColor(Color.RED)
-                Imglabel.text = label
-                Desc.visibility = View.GONE
-                Safe.visibility = View.GONE
-                labeldesc.visibility = View.GONE
-                labelsafe.visibility = View.GONE
-                preplbl.visibility = View.GONE
-                prepar.visibility = View.GONE
-                name.visibility = View.GONE
-
-            } else {
-                Imglabel.setTextColor(Color.BLACK)
-                val confidenceText = "%.2f".format(maxProb * 100)
-                Imglabel.text = "$label (Confidence: $confidenceText%)"
-                Desc.visibility = View.VISIBLE
-                Safe.visibility = View.VISIBLE
-                labeldesc.visibility = View.VISIBLE
-                labelsafe.visibility = View.VISIBLE
-                prepar.visibility = View.VISIBLE
-                preplbl.visibility = View.VISIBLE
-                name.visibility = View.VISIBLE
-                labeldesc.text = description
-                Safe.text = safety_warning
-                preplbl.text = preparation
-
-
-            }
 
         model.close()
     }
@@ -1042,10 +1044,8 @@ class Classify : BaseActivity() {
             Toast.makeText(this, "Save failed!", Toast.LENGTH_SHORT).show()
         }
     }
-
-
 }
-// Real-Time Scanner
+
 class ScannerActivity : BaseActivity() {
 
     private lateinit var Scan: ImageButton
@@ -1055,11 +1055,17 @@ class ScannerActivity : BaseActivity() {
     private lateinit var bottomCard: androidx.cardview.widget.CardView
     private lateinit var plantName: TextView
     private lateinit var plantImage: ImageView
-    private lateinit var herbalModel: HerbalRecognationSemifi
+    private lateinit var herbalModel: ModelUnquant
     private lateinit var objectDetector: com.google.mlkit.vision.objects.ObjectDetector
     private var herbalLabels: List<String> = emptyList()
 
-    // Flag to handle the 3-second pause
+    // Optimization: Background thread and pre-allocated buffers
+    private val modelExecutor = Executors.newSingleThreadExecutor()
+    private var isModelProcessing = false
+    private lateinit var inputFeature0: TensorBuffer
+    private lateinit var byteBuffer: ByteBuffer
+    private lateinit var intValues: IntArray
+
     private var isProcessingPaused = false
 
     override val layoutResourceId: Int = R.layout.viewfinder
@@ -1068,37 +1074,36 @@ class ScannerActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.viewfinder)
 
+        // Pre-allocate model buffers once to save CPU and memory
+        val modelInputSize = 224
+        inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, modelInputSize, modelInputSize, 3), DataType.FLOAT32)
+        byteBuffer = ByteBuffer.allocateDirect(4 * modelInputSize * modelInputSize * 3).order(ByteOrder.nativeOrder())
+        intValues = IntArray(modelInputSize * modelInputSize)
+
         setupNavigation()
         setupHerbalModel()
         loadLabels()
 
         bottomCard = findViewById(R.id.bottomCard)
         bottomCard.visibility = View.GONE
-        plantName = findViewById(R.id.cardlabel) // Give your Card's Title TextView an ID in XML
+        plantName = findViewById(R.id.cardlabel)
         plantImage = findViewById(R.id.cardIm)
         Scan = findViewById<ImageButton>(R.id.Scan)
         Prev = findViewById<PreviewView>(R.id.Prev)
         Txtres = findViewById<TextView>(R.id.Txtres)
         view = findViewById<View>(R.id.targetBox)
 
-        Scan.setOnClickListener {
-            checkCameraPermission()
-        }
+        Scan.setOnClickListener { checkCameraPermission() }
 
         bottomCard.setOnClickListener {
-            // 1. Get the current bitmap from the ImageView
             val drawable = plantImage.drawable as? android.graphics.drawable.BitmapDrawable
             val bitmap = drawable?.bitmap
 
             if (bitmap != null) {
                 val intent = Intent(this, Classify::class.java)
-
-                // 2. Pass the Plant Name (Label)
                 intent.putExtra("PLANT_NAME", plantName.text.toString())
 
-                // 3. Compress Image to ByteArray
                 val stream = java.io.ByteArrayOutputStream()
-                // Use JPEG and 80% quality to avoid "TransactionTooLargeException"
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream)
                 val byteArray = stream.toByteArray()
                 intent.putExtra("capturedImage", byteArray)
@@ -1112,12 +1117,12 @@ class ScannerActivity : BaseActivity() {
 
     private fun setupHerbalModel() {
         try {
-            herbalModel = HerbalRecognationSemifi.newInstance(this)
+            herbalModel = ModelUnquant.newInstance(this)
             val options = ObjectDetectorOptions.Builder()
                 .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
                 .enableClassification()
                 .build()
-            objectDetector = com.google.mlkit.vision.objects.ObjectDetection.getClient(options)
+            objectDetector = ObjectDetection.getClient(options)
         } catch (e: Exception) {
             Log.e("Scanner", "Initialization failed: ${e.message}")
         }
@@ -1142,25 +1147,26 @@ class ScannerActivity : BaseActivity() {
 
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
-            val cameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(Prev.surfaceProvider)
-            }
+            try {
+                val cameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder().build().also {
+                    it.setSurfaceProvider(Prev.surfaceProvider)
+                }
 
-            val imageAnalysis = ImageAnalysis.Builder()
-                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
-                .build()
+                val imageAnalysis = ImageAnalysis.Builder()
+                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                    .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
+                    .build()
 
-            imageAnalysis.setAnalyzer(ContextCompat.getMainExecutor(this)) { imageProxy ->
-                if (isProcessingPaused) {
-                    imageProxy.close()
-                } else {
+                // Use background executor to prevent ANRs
+                imageAnalysis.setAnalyzer(modelExecutor) { imageProxy ->
+                    if (isProcessingPaused || isModelProcessing) {
+                        imageProxy.close()
+                        return@setAnalyzer
+                    }
                     processImageProxy(imageProxy)
                 }
-            }
 
-            try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, preview, imageAnalysis)
             } catch (exc: Exception) {
@@ -1171,12 +1177,18 @@ class ScannerActivity : BaseActivity() {
 
     @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
     private fun processImageProxy(imageProxy: ImageProxy) {
-        val mediaImage = imageProxy.image ?: return
+        val mediaImage = imageProxy.image ?: run {
+            imageProxy.close()
+            return
+        }
+
         val rotation = imageProxy.imageInfo.rotationDegrees
         val image = InputImage.fromMediaImage(mediaImage, rotation)
 
         objectDetector.process(image)
             .addOnSuccessListener { objects ->
+                if (isProcessingPaused) return@addOnSuccessListener
+
                 updateTargetBoxToCenter()
 
                 if (objects.isEmpty()) {
@@ -1189,111 +1201,90 @@ class ScannerActivity : BaseActivity() {
                 }
 
                 for (detectedObject in objects) {
+                    if (isProcessingPaused || isModelProcessing) break
+
                     val boundingBox = detectedObject.boundingBox
-                    val isRotated = rotation == 90 || rotation == 270
-                    val frameWidth = if (isRotated) imageProxy.height.toFloat() else imageProxy.width.toFloat()
-                    val frameHeight = if (isRotated) imageProxy.width.toFloat() else imageProxy.height.toFloat()
+                    val fullBitmap = Prev.bitmap
 
-                    val scaleX = frameWidth / Prev.width.toFloat()
-                    val scaleY = frameHeight / Prev.height.toFloat()
+                    if (fullBitmap != null) {
+                        isModelProcessing = true // Lock the model
 
-                    val targetBoxInImage = Rect(
-                        (view.left * scaleX).toInt(),
-                        (view.top * scaleY).toInt(),
-                        (view.right * scaleX).toInt(),
-                        (view.bottom * scaleY).toInt()
-                    )
+                        // Map coordinates from ML Kit box to Bitmap
+                        val isRotated = rotation == 90 || rotation == 270
+                        val frameWidth = if (isRotated) imageProxy.height.toFloat() else imageProxy.width.toFloat()
+                        val frameHeight = if (isRotated) imageProxy.width.toFloat() else imageProxy.height.toFloat()
 
-                    if (targetBoxInImage.contains(boundingBox.centerX(), boundingBox.centerY())) {
-                        runOnUiThread { view.alpha = 1.0f }
-                        val fullBitmap = Prev.bitmap
-                        if (fullBitmap != null) {
-                            val bitmapScaleX = fullBitmap.width.toFloat() / frameWidth
-                            val bitmapScaleY = fullBitmap.height.toFloat() / frameHeight
+                        val scaleX = fullBitmap.width / frameWidth
+                        val scaleY = fullBitmap.height / frameHeight
 
-                            val scaledRect = Rect(
-                                (boundingBox.left * bitmapScaleX).toInt(),
-                                (boundingBox.top * bitmapScaleY).toInt(),
-                                (boundingBox.right * bitmapScaleX).toInt(),
-                                (boundingBox.bottom * bitmapScaleY).toInt()
-                            )
+                        val scaledRect = Rect(
+                            (boundingBox.left * scaleX).toInt(),
+                            (boundingBox.top * scaleY).toInt(),
+                            (boundingBox.right * scaleX).toInt(),
+                            (boundingBox.bottom * scaleY).toInt()
+                        )
 
-                            val croppedBitmap = cropBitmap(fullBitmap, scaledRect)
-                            runHerbalModel(croppedBitmap)
-                        }
-                    } else {
-                        runOnUiThread {
-                            Txtres.text = "Move plant into the scanner"
-                            Txtres.setTextColor(Color.YELLOW)
-                            view.alpha = 0.3f
-                        }
+                        val croppedBitmap = cropBitmap(fullBitmap, scaledRect)
+                        runHerbalModel(croppedBitmap)
                     }
                 }
             }
-            .addOnCompleteListener { imageProxy.close() }
+            .addOnCompleteListener {
+                imageProxy.close()
+            }
     }
 
     private fun runHerbalModel(bitmap: Bitmap) {
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 180, 180, true)
-        val inputFeature0 = org.tensorflow.lite.support.tensorbuffer.TensorBuffer.createFixedSize(intArrayOf(1, 180, 180, 3), org.tensorflow.lite.DataType.FLOAT32)
-        val byteBuffer = java.nio.ByteBuffer.allocateDirect(4 * 180 * 180 * 3).order(java.nio.ByteOrder.nativeOrder())
+        val modelInputSize = 224
 
-        val intValues = IntArray(180 * 180)
-        scaledBitmap.getPixels(intValues, 0, 180, 0, 0, 180, 180)
+        // Square crop to match model expectations
+        val dimension = Math.min(bitmap.width, bitmap.height)
+        val centerCroppedBitmap = Bitmap.createBitmap(bitmap, (bitmap.width - dimension) / 2, (bitmap.height - dimension) / 2, dimension, dimension)
+        val scaledBitmap = Bitmap.createScaledBitmap(centerCroppedBitmap, modelInputSize, modelInputSize, true)
+
+        // Clear and fill the reusable buffer
+        byteBuffer.clear()
+        scaledBitmap.getPixels(intValues, 0, modelInputSize, 0, 0, modelInputSize, modelInputSize)
 
         for (pixel in intValues) {
-            byteBuffer.putFloat((pixel shr 16 and 0xFF).toFloat())
-            byteBuffer.putFloat((pixel shr 8 and 0xFF).toFloat())
-            byteBuffer.putFloat((pixel and 0xFF).toFloat())
+            byteBuffer.putFloat(((pixel shr 16 and 0xFF) / 127.5f) - 1.0f)
+            byteBuffer.putFloat(((pixel shr 8 and 0xFF) / 127.5f) - 1.0f)
+            byteBuffer.putFloat(((pixel and 0xFF) / 127.5f) - 1.0f)
         }
-        inputFeature0.loadBuffer(byteBuffer)
 
+        inputFeature0.loadBuffer(byteBuffer)
         val outputs = herbalModel.process(inputFeature0)
         val scores = outputs.outputFeature0AsTensorBuffer.floatArray
         val maxIndex = scores.indices.maxByOrNull { scores[it] } ?: -1
 
         runOnUiThread {
+            isModelProcessing = false // Unlock
             if (maxIndex != -1 && maxIndex < herbalLabels.size) {
                 val confidence = scores[maxIndex]
                 val detectedLabel = herbalLabels[maxIndex]
 
-                if (confidence > 0.65f) {
-                    if (detectedLabel.contains("Invalid!", ignoreCase = true)) {
-                        Txtres.text = "Invalid: Not a recognized plant"
-                        Txtres.setTextColor(Color.RED)
-                        bottomCard.visibility = View.GONE
-                    } else {
-                        // VALID PLANT - Pause Processing and Camera
-                        isProcessingPaused = true
+                if (confidence > 0.65f && !detectedLabel.contains("Invalid!", ignoreCase = true)) {
+                    isProcessingPaused = true
 
-                        // Unbind camera to freeze the preview
-                        val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-                        val cameraProvider = cameraProviderFuture.get()
-                        cameraProvider.unbindAll()
-
-                        Txtres.text = "$detectedLabel (${(confidence * 100).toInt()}%)"
-                        Txtres.setTextColor(Color.GREEN)
-
-                        bottomCard.visibility = View.VISIBLE
-                        plantImage.setImageBitmap(bitmap)
-                        plantName.text = detectedLabel
-
-                        // Wait 3 seconds, then restart camera and analysis
-                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                            isProcessingPaused = false
-                            startCamera() // Restart camera feed
-                            Txtres.text = "Analyzing..."
-                            Txtres.setTextColor(Color.CYAN)
-                            bottomCard.visibility = View.GONE
-
-                        }, 3000)
+                    try {
+                        ProcessCameraProvider.getInstance(this).get().unbindAll()
+                    } catch (e: Exception) {
+                        Log.e("Scanner", "Unbind failed: ${e.message}")
                     }
-                } else {
-                    Txtres.text = "Analyzing..."
-                    Txtres.setTextColor(Color.CYAN)
-                    bottomCard.visibility = View.GONE
-                    isProcessingPaused = false
-                    startCamera()
+
+                    Txtres.text = "$detectedLabel (${(confidence * 100).toInt()}%)"
+                    Txtres.setTextColor(Color.GREEN)
+                    bottomCard.visibility = View.VISIBLE
+                    plantImage.setImageBitmap(bitmap)
+                    plantName.text = detectedLabel
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        isProcessingPaused = false
+                        bottomCard.visibility = View.GONE
+                        Txtres.text = "Scanning..."
+                        Txtres.setTextColor(Color.WHITE)
+                        startCamera()
+                    }, 3000)
                 }
             }
         }
@@ -1448,21 +1439,6 @@ class Setting : BaseActivity(){
             e.printStackTrace()
         }
 
-        //App or Overall Storage consumed
-        val appDataSize = getFolderSize(dataDir)
-
-        // 2. Get APK Size (The size of the app installed from the store)
-        val apkFile = File(packageCodePath)
-        val apkSize = if (apkFile.exists()) apkFile.length() else 0L
-
-        // 3. Total App Size
-        val totalAppSizeInBytes = appDataSize + apkSize
-        val totalAppSizeInMB = totalAppSizeInBytes / (1024.0 * 1024.0)
-
-        val tvAppStorage = findViewById<TextView>(R.id.tvAppSize)
-        tvAppStorage?.text = String.format("App Size: %.2f MB", totalAppSizeInMB)
-
-
         //Saved Plants Consumed
         val dbFile = getDatabasePath("HerbalPlants.db")
         val dbSizeInBytes = if (dbFile.exists()) dbFile.length() else 0L
@@ -1486,26 +1462,5 @@ class Setting : BaseActivity(){
         // Convert to GB for the text display
         val totalGB = totalMB / 1024.0
         val usedGB = usedMB / 1024.0
-
-        val tvDeviceStorage = findViewById<TextView>(R.id.tvDeviceStorage)
-        val deviceStorageBar = findViewById<ProgressBar>(R.id.deviceStorageBar)
-
-        // Displaying with 1 decimal place (e.g., 12.5 GB of 64.0 GB)
-        tvDeviceStorage?.text = String.format("Phone Storage: %.1f GB used of %.1f GB", usedGB, totalGB)
-
-        // Use MB for the progress bar to ensure smooth accuracy
-        deviceStorageBar?.max = totalMB.toInt()
-        deviceStorageBar?.progress = usedMB.toInt()
-    }
-    private fun getFolderSize(file: File): Long {
-        var size: Long = 0
-        if (file.exists() && file.isDirectory) {
-            file.listFiles()?.forEach { child ->
-                size += if (child.isDirectory) getFolderSize(child) else child.length()
-            }
-        } else if (file.exists()) {
-            size = file.length()
-        }
-        return size
     }
 }
