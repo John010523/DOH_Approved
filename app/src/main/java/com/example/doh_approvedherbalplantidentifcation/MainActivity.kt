@@ -63,8 +63,7 @@ import com.greenbuddy.doh_approvedherb_identifier.NextActivity.Companion.REQUEST
 //import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalModel
 //import com.greenbuddy.doh_approvedherb_identifier.ml.Greenbuddy
 //import com.greenbuddy.doh_approvedherb_identifier.ml.Model
-import com.greenbuddy.doh_approvedherb_identifier.ml.ModelUnquant
-
+import com.greenbuddy.doh_approvedherb_identifier.ml.GreenbuddyModel
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -599,7 +598,7 @@ class Category : BaseActivity()    {
         }
     }
 
-}
+}   
 
 //Fourth Activity Ddi makita an saved predicted or classified photos
 class HerbActivity : BaseActivity() {
@@ -825,7 +824,7 @@ class Classify : BaseActivity() {
     //  Run Classification tima pag deploy san model
     private fun runPrediction(bitmap: Bitmap) {
         // 1. DECLARE THE CORRECT SIZE HERE
-        val modelInputSize = 224
+        val modelInputSize = 180
 
         val dimension = Math.min(bitmap.width, bitmap.height)
         val centerCroppedBitmap = Bitmap.createBitmap(bitmap, (bitmap.width - dimension) / 2, (bitmap.height - dimension) / 2, dimension, dimension)
@@ -840,7 +839,7 @@ class Classify : BaseActivity() {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
 
-        val model = ModelUnquant.newInstance(this)
+        val model = GreenbuddyModel.newInstance(this)
 
         // 2. Preprocess image - CHANGE 180 TO modelInputSize (160)
         val imageProcessor = ImageProcessor.Builder()
@@ -1055,7 +1054,7 @@ class ScannerActivity : BaseActivity() {
     private lateinit var bottomCard: androidx.cardview.widget.CardView
     private lateinit var plantName: TextView
     private lateinit var plantImage: ImageView
-    private lateinit var herbalModel: ModelUnquant
+    private lateinit var herbalModel: GreenbuddyModel
     private lateinit var objectDetector: com.google.mlkit.vision.objects.ObjectDetector
     private var herbalLabels: List<String> = emptyList()
 
@@ -1117,7 +1116,7 @@ class ScannerActivity : BaseActivity() {
 
     private fun setupHerbalModel() {
         try {
-            herbalModel = ModelUnquant.newInstance(this)
+            herbalModel = GreenbuddyModel.newInstance(this)
             val options = ObjectDetectorOptions.Builder()
                 .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
                 .enableClassification()
@@ -1235,7 +1234,7 @@ class ScannerActivity : BaseActivity() {
     }
 
     private fun runHerbalModel(bitmap: Bitmap) {
-        val modelInputSize = 224
+        val modelInputSize = 180
 
         // Square crop to match model expectations
         val dimension = Math.min(bitmap.width, bitmap.height)
