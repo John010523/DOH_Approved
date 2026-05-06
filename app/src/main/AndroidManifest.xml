@@ -51,6 +51,10 @@
         <activity android:name=".Setting"
             android:theme="@style/TransparentTheme"/>
 
+        <meta-data
+            android:name="developer_credit"
+            android:value="Programmed by John Dupal" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.greenbuddy.doh_approvedherb_identifier.provider"

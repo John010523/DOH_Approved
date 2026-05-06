@@ -59,11 +59,12 @@ import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
 import com.greenbuddy.doh_approvedherb_identifier.NextActivity.Companion.REQUEST_CAMERA_CAPTURE
+import com.greenbuddy.doh_approvedherb_identifier.ml.Greenbuddy
+//import com.greenbuddy.doh_approvedherb_identifier.ml.GreenModel
+
 //import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalRecognationSemifi
 //import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalModel
-//import com.greenbuddy.doh_approvedherb_identifier.ml.Greenbuddy
-//import com.greenbuddy.doh_approvedherb_identifier.ml.Model
-import com.greenbuddy.doh_approvedherb_identifier.ml.GreenbuddyModel
+//import com.greenbuddy.doh_approvedherb_identifier.ml.GreenbuddyModel
 import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -185,6 +186,7 @@ class NextActivity : BaseActivity() { // CHANGED THIS
     }
     //private val handler = Handler(Looper.getMainLooper())
     private lateinit var frontimg: ImageView
+
     private lateinit var frame: FrameLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -200,21 +202,125 @@ class NextActivity : BaseActivity() { // CHANGED THIS
 
         //startSingleImageFlip()
 
-        val browsing = findViewById<TextView>(R.id.browsee)
-        browsing.setOnClickListener {
-            val intent = Intent(this, Category::class.java)
-            startActivity(intent)
-        }
         val sav = findViewById<TextView>(R.id.saved)
         sav.setOnClickListener {
             val intent = Intent(this, HerbActivity::class.java)
             startActivity(intent)
         }
+        //image card for browsing
+
+
+        // Akapulko
+        val akacard = findViewById<CardView>(R.id.akapulkocard)
+        akacard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Akapulko")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.aa)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Ampalaya
+        val ampacard = findViewById<CardView>(R.id.ampalayacard)
+        ampacard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Ampalaya")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.am)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Bawang
+        val bacard = findViewById<CardView>(R.id.bawangcard)
+        bacard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Bawang")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.bawang)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Bayabas
+        val bayacard = findViewById<CardView>(R.id.bayabascard)
+        bayacard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Bayabas")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.bayabas)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Lagundi
+        val lagucard = findViewById<CardView>(R.id.lagundicard)
+        lagucard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Lagundi")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.lagundi)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Niyog-Niyogan
+        val niyogcard = findViewById<CardView>(R.id.niyog_niyogancard)
+        niyogcard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Niyog-Niyogan")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.nnnn)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Pansit-Pansitan
+        val pancard = findViewById<CardView>(R.id.pansit_pansitancard)
+        pancard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Pancit-Pancitan")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.pp)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Sambong
+        val samcard = findViewById<CardView>(R.id.sambongcard)
+        samcard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Sambong")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.sambong)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Tsaang-Gubat
+        val tsacard = findViewById<CardView>(R.id.tsang_gubatcard)
+        tsacard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Tsaang-Gubat")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.tsts)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+        // Yerba Buena
+        val yeracard = findViewById<CardView>(R.id.ybcard)
+        yeracard.setOnClickListener {
+            val intent = Intent(this, Category::class.java)
+            intent.putExtra("HERB_NAME", "Yerba Buena")
+            intent.putExtra("HERB_IMAGE_ID", R.drawable.yb)
+            Toast.makeText(this, "Scroll Down!", Toast.LENGTH_SHORT).show()
+            startActivity(intent)
+        }
+
+
+
+
+
 
     }
     override fun onResume() {
         super.onResume()
     }
+
+// Update your card listeners
 
 
     /*private fun startSingleImageFlip() {
@@ -230,33 +336,18 @@ class NextActivity : BaseActivity() { // CHANGED THIS
 }
 
 // Third activity for browsing
-class Category : BaseActivity()    {
+class Category : BaseActivity() {
 
     override val layoutResourceId: Int = R.layout.category
 
-    private lateinit var category_spinner: Spinner
-    private lateinit var category_background: ImageView
-    private lateinit var category_background2: ImageView
-    private lateinit var herbalspinner: Spinner
-    private lateinit var deseasespinner: Spinner
-    private lateinit var herbalcategory: TextView
-    private lateinit var deseasecategory: TextView
-    private lateinit var adapterItem: ArrayAdapter<String>
-    private lateinit var adapterItemHerb: ArrayAdapter<String> // Changed CharArray to String
-    private lateinit var adapterItemDisease: ArrayAdapter<String>
     private lateinit var itemImage: ImageView
+    private lateinit var herbalcategory: TextView
+    private lateinit var itemDiseases: TextView // New field
     private lateinit var itemDefinition: TextView
+    private lateinit var itemPreparation: TextView
+    private lateinit var itemWarning: TextView
+    private lateinit var itemLocation: TextView
     private lateinit var defsv: ScrollView
-    private lateinit var tit: TextView
-    private lateinit var tit2: TextView
-    private lateinit var tit3: TextView
-
-
-
-    private lateinit var recommend: ImageView
-    private lateinit var recommend2: ImageView
-    private lateinit var recommend3: ImageView
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -264,340 +355,106 @@ class Category : BaseActivity()    {
 
         setupNavigation()
 
-        //Dropdown categories
-        val Choose_Category = arrayOf("Select A Category", "Herbal plant", "Disease")
-        val Herb_Category = arrayOf("Select Herbs", "Akapulko","Ampalaya","Bawang","Bayabas","Lagundi", "Niyog-Niyogan","Pancit-Pancitan","Sambong","Tsaang-Gubat", "Yerba Buena") // Changed to Array<String>
-        val Disease_Category = arrayOf("Select Disease", "Tooth Ache", "Stomach Ache", "Head Ache", "Back Ache", "Ear Ache")
-
-        category_spinner = findViewById(R.id.category_spinner)
-        category_background = findViewById(R.id.category_background)
-        category_background2 = findViewById(R.id.category_background2)
-        herbalspinner = findViewById(R.id.herbalspinner)
-        deseasespinner = findViewById(R.id.deseasespinner)
-        herbalcategory = findViewById(R.id.herbalcategory)
-        deseasecategory = findViewById(R.id.deseasecategory)
-        defsv = findViewById(R.id.svdef)
-        tit = findViewById(R.id.title)
-        tit2 = findViewById(R.id.title2)
-        tit3 = findViewById(R.id.title3)
-        recommend=findViewById(R.id.rec)
-        recommend2=findViewById(R.id.rec2)
-        recommend3=findViewById(R.id.rec3)
+        // 1. Initialize Views
         itemImage = findViewById(R.id.item_image)
+        herbalcategory = findViewById(R.id.herbalcategory)
+        itemDiseases = findViewById(R.id.item_diseases)    // Set this up in your XML
         itemDefinition = findViewById(R.id.item_definition)
-        adapterItem = ArrayAdapter(this, android.R.layout.simple_spinner_item, Choose_Category)
-        adapterItemHerb = ArrayAdapter(this, android.R.layout.simple_spinner_item, Herb_Category)
-        adapterItemDisease = ArrayAdapter(this, android.R.layout.simple_spinner_item, Disease_Category)
-        adapterItem.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        adapterItemHerb.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) // Added this line
-        adapterItemDisease.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        category_spinner.adapter = adapterItem
+        itemPreparation = findViewById(R.id.item_preparation)
+        itemWarning = findViewById(R.id.item_warning)
+        itemLocation = findViewById(R.id.item_location)
+        defsv = findViewById(R.id.svdef)
 
+        // 2. Get Data from Intent
+        val herbName = intent.getStringExtra("HERB_NAME")
+        val herbImage = intent.getIntExtra("HERB_IMAGE_ID", 0)
 
-        //Choices between Herbal and Deseases category
-        category_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?, view: View?, position: Int, id: Long
-            ) {
-                val selectedItem = parent?.getItemAtPosition(position)?.toString()?.trim()
-
-                Toast.makeText(this@Category, "Selected: $selectedItem", Toast.LENGTH_SHORT).show()
-
-                if (selectedItem.equals("Herbal plant", ignoreCase = true)) {
-                    herbalspinner.visibility = View.VISIBLE
-                    herbalcategory.visibility = View.VISIBLE
-                    itemImage.visibility = View.VISIBLE
-                    itemDefinition.visibility = View.VISIBLE
-                    defsv.visibility = View.VISIBLE
-                    category_background.visibility = View.VISIBLE
-                    category_background2.visibility = View.GONE
-                    herbalcategory.text = ""
-                    tit.visibility = View.GONE
-                    tit2.visibility = View.GONE
-                    tit3.visibility = View.GONE
-                    herbalspinner.adapter = adapterItemHerb
-                    deseasespinner.visibility = View.GONE
-                    deseasecategory.visibility = View.GONE
-                } else if (selectedItem.equals("Disease", ignoreCase = true)) {
-                    deseasespinner.visibility = View.VISIBLE
-                    deseasecategory.visibility = View.VISIBLE
-                    itemImage.visibility = View.VISIBLE
-                    itemDefinition.visibility = View.VISIBLE
-                    defsv.visibility = View.VISIBLE
-                    tit.visibility = View.VISIBLE
-                    tit2.visibility = View.VISIBLE
-                    tit3.visibility = View.VISIBLE
-                    category_background.visibility = View.GONE
-                    category_background2.visibility = View.VISIBLE
-                    deseasecategory.text = ""
-                    herbalspinner.visibility = View.GONE
-                    herbalcategory.visibility = View.GONE
-                    deseasespinner.adapter = adapterItemDisease // Set adapter for deseasespinner
-                } else {
-                    // Hide both if "Select Category" or unknown
-                    category_background.visibility = View.VISIBLE
-                    category_background2.visibility = View.GONE
-                    herbalspinner.visibility = View.GONE
-                    herbalcategory.visibility = View.GONE
-                    deseasespinner.visibility = View.GONE
-                    deseasecategory.visibility = View.GONE
-                    itemImage.visibility = View.GONE
-                    itemDefinition.visibility = View.GONE
-                    defsv.visibility = View.GONE
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                herbalspinner.visibility = View.GONE
-                herbalcategory.visibility = View.GONE
-                deseasespinner.visibility = View.GONE
-                deseasecategory.visibility = View.GONE
-                itemImage.visibility = View.GONE
-                itemDefinition.visibility = View.GONE
-                category_background.visibility = View.VISIBLE
-            }
-        }
-
-        //Ini liwat Herbal tanan
-        herbalspinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val herb = parent?.getItemAtPosition(position)?.toString()?.trim()
-                herbalcategory.text = herb
-
-                when (herb) {
-                    "Akapulko" -> {
-                        itemImage.setImageResource(R.drawable.aa)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Akapulko (Cassia alata) is known for its antifungal properties, used to treat ringworm, scabies, and eczema."
-                        category_background.visibility = View.GONE
-                    }
-                    "Ampalaya" -> {
-                        itemImage.setImageResource(R.drawable.am)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Ampalaya (Momordica charantia), also known as bitter melon, is used to help manage diabetes and lower blood sugar levels."
-                        category_background.visibility = View.GONE
-                    }
-                    "Bawang" -> {
-                        itemImage.setImageResource(R.drawable.bawang)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Bawang (Allium sativum), or garlic, is known for reducing cholesterol and helping control blood pressure."
-                        category_background.visibility = View.GONE
-                    }
-                    "Bayabas" -> {
-                        itemImage.setImageResource(R.drawable.bayabas)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Bayabas (Psidium guajava), or guava, is used as an antiseptic to disinfect wounds and as a mouthwash for tooth and gum infections."
-                        category_background.visibility = View.GONE
-                    }
-                    "Lagundi" -> {
-                        itemImage.setImageResource(R.drawable.lagundi)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Lagundi (Vitex negundo) is a shrub used to treat cough, asthma, and fever. Endorsed by the DOH for respiratory relief."
-                        category_background.visibility = View.GONE
-                    }
-                    "Niyog-Niyogan" -> {
-                        itemImage.setImageResource(R.drawable.nnnn)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Niyog-Niyogan (Combretum indicum) is a vine used as a dewormer and for treating headaches and skin ulcers."
-                        category_background.visibility = View.GONE
-                    }
-                    "Pancit-Pancitan" -> {
-                        itemImage.setImageResource(R.drawable.pp)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Pancit-Pancitan (Peperomia pellucida) is used for gout, arthritis, and skin disorders. It lowers uric acid levels."
-                        category_background.visibility = View.GONE
-                    }
-                    "Sambong" -> {
-                        itemImage.setImageResource(R.drawable.sambong)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Sambong (Blumea balsamifera) is a diuretic herb used for kidney stones, fever, and respiratory infections."
-                        category_background.visibility = View.GONE
-                    }
-                    "Tsaang-Gubat" -> {
-                        itemImage.setImageResource(R.drawable.tsts)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Tsaang Gubat (Ehretia microphylla) is a wild tea used for stomach pain, diarrhea, and as a mouthwash."
-                        category_background.visibility = View.GONE
-                    }
-                    "Yerba Buena" -> {
-                        itemImage.setImageResource(R.drawable.yb)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.GONE
-                        recommend2.visibility = View.GONE
-                        recommend3.visibility = View.GONE
-                        tit.visibility = View.GONE
-                        tit2.visibility = View.GONE
-                        tit3.visibility = View.GONE
-                        itemDefinition.text = "Yerba Buena (Clinopodium douglasii) is a mint herb used for pain relief, digestive issues, and as a mouthwash."
-                        category_background.visibility = View.GONE
-                    }
-                    else -> {
-                        itemImage.setImageDrawable(null)
-                        itemDefinition.text = ""
-                        category_background.visibility = View.VISIBLE
-                        defsv.visibility= View.GONE
-                    }
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                category_background.visibility = View.VISIBLE
-            }
-        }
-
-        //Ini liwat Deseases tun
-        deseasespinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val disease = parent?.getItemAtPosition(position)?.toString()?.trim()
-                deseasecategory.text = disease
-
-                when (disease) {
-                    "Tooth Ache" -> {
-                        itemImage.setImageResource(R.drawable.tooth_ache)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.VISIBLE
-                        recommend2.visibility= View.VISIBLE
-                        recommend3.visibility= View.VISIBLE
-                        recommend.setImageResource(R.drawable.clove_oil)
-                        recommend2.setImageResource(R.drawable.lagundi)
-                        tit.setText("Clove Oil")
-                        tit2.setText("Lagundi")
-                        tit3.setText("Peppermint Leaf")
-                        recommend3.setImageResource(R.drawable.peppermint_leaf)
-                        itemDefinition.text = "Recommended Herbal Medicine: Clove Oil, Lagundi, Peppermint Leaf"
-                        category_background2.visibility = View.GONE
-                    }
-                    "Stomach Ache" -> {
-                        itemImage.setImageResource(R.drawable.stomach_ache)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.VISIBLE
-                        recommend2.visibility= View.VISIBLE
-                        recommend3.visibility= View.VISIBLE
-                        recommend.setImageResource(R.drawable.ginger)
-                        recommend2.setImageResource(R.drawable.chamomile)
-                        recommend3.setImageResource(R.drawable.tsts)
-                        tit.setText("Ginger")
-                        tit2.setText("Chamomile")
-                        tit3.setText("Tsaang-Gubat")
-                        itemDefinition.text = "Recommended Herbal Medicine: Ginger, Chamomile, Tsaang-Gubat"
-                        category_background2.visibility = View.GONE
-                    }
-                    "Head Ache" -> {
-                        itemImage.setImageResource(R.drawable.head_ache)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.VISIBLE
-                        recommend2.visibility= View.VISIBLE
-                        recommend3.visibility= View.VISIBLE
-                        recommend.setImageResource(R.drawable.yb)
-                        recommend2.setImageResource(R.drawable.feverfew)
-                        recommend3.setImageResource(R.drawable.rosemary)
-                        tit.setText("Yerba Buena")
-                        tit2.setText("Feverfew")
-                        tit3.setText("Rosemary")
-                        itemDefinition.text = "Recommended Herbal Medicine: Yerba Buena, Feverfew, Rosemary"
-                        category_background2.visibility = View.GONE
-                    }
-                    "Back Ache" -> {
-                        itemImage.setImageResource(R.drawable.back_ache)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.VISIBLE
-                        recommend2.visibility= View.VISIBLE
-                        recommend3.visibility= View.VISIBLE
-                        recommend.setImageResource(R.drawable.turmeric)
-                        recommend2.setImageResource(R.drawable.sambong)
-                        recommend3.setImageResource(R.drawable.wwb)
-                        tit.setText("Turmeric")
-                        tit2.setText("Sambong")
-                        tit3.setText("White Willow Bark")
-                        itemDefinition.text = "Recommended Herbal Medicine: Turmeric, Sambong, White Willow Bark"
-                        category_background2.visibility = View.GONE
-                    }
-                    "Ear Ache" -> {
-                        itemImage.setImageResource(R.drawable.ear_ache)
-                        defsv.visibility= View.VISIBLE
-                        recommend.visibility= View.VISIBLE
-                        recommend2.visibility= View.VISIBLE
-                        recommend3.visibility= View.VISIBLE
-                        recommend.setImageResource(R.drawable.garlic_oil)
-                        recommend2.setImageResource(R.drawable.mullein)
-                        recommend3.setImageResource(R.drawable.chamomile)
-                        tit.setText("Garlic Oil")
-                        tit2.setText("Mullein")
-                        tit3.setText("Chamomile")
-                        itemDefinition.text = "Recommended Herbal Medicine: Garlic Oil, Mullein, Chamomile"
-                        category_background2.visibility = View.GONE
-                    }
-                    else -> {
-                        itemImage.setImageDrawable(null)
-                        itemDefinition.text = ""
-                        category_background2.visibility = View.VISIBLE
-                        defsv.visibility= View.GONE
-                    }
-                }
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                itemImage.setImageDrawable(null)
-                itemDefinition.text = ""
-                category_background2.visibility = View.VISIBLE
-            }
+        // 3. Display Data
+        if (herbName != null) {
+            herbalcategory.text = herbName
+            itemImage.setImageResource(herbImage)
+            loadHerbDetails(herbName)
         }
     }
 
+    private fun loadHerbDetails(name: String) {
+        when (name) {
+            "Akapulko" -> {
+                itemDiseases.text = "Treats: Ringworm, Scabies, Eczema, Tinea Flava."
+                itemDefinition.text = "A tropical shrub known for its antifungal properties."
+                itemPreparation.text = "Pound fresh leaves and apply the juice to the skin twice daily."
+                itemWarning.text = "For external use only. Avoid contact with eyes."
+                itemLocation.text = "Found in open fields and waste places throughout the Philippines."
+            }
+            "Ampalaya" -> {
+                itemDiseases.text = "Treats: Diabetes (Mild Non-insulin dependent), Hemorrhoids."
+                itemDefinition.text = "A climbing vine with bitter-tasting fruit used for blood sugar management."
+                itemPreparation.text = "Boil chopped leaves (1 cup leaves to 2 cups water) for 15 minutes. Drink 1/3 cup thrice a day."
+                itemWarning.text = "Excessive intake may cause stomach cramps."
+                itemLocation.text = "Widely cultivated in the Philippines for its edible fruit."
+            }
+            "Bawang" -> {
+                itemDiseases.text = "Treats: Hypertension, High Cholesterol, Toothache."
+                itemDefinition.text = "A common kitchen spice with strong medicinal properties for the heart."
+                itemPreparation.text = "For hypertension: Eat 2 cloves of roasted/blanched garlic after meals. For toothache: Pound a clove and apply to the cavity."
+                itemWarning.text = "Avoid eating on an empty stomach to prevent gastric irritation."
+                itemLocation.text = "Cultivated in various provinces, especially in Ilocos."
+            }
+            "Bayabas" -> {
+                itemDiseases.text = "Treats: Diarrhea, Wounds, Gum Infection (Gingivitis)."
+                itemDefinition.text = "A tree whose leaves act as a powerful natural antiseptic."
+                itemPreparation.text = "Boil leaves to use as a wash for wounds or as a gargle for swollen gums."
+                itemWarning.text = "Do not use for prolonged periods as a mouthwash (may stain teeth)."
+                itemLocation.text = "Common throughout the Philippines in backyards and forests."
+            }
+            "Lagundi" -> {
+                itemDiseases.text = "Treats: Cough, Asthma, Fever, Rheumatism."
+                itemDefinition.text = "A large shrub officially endorsed by the DOH for respiratory relief."
+                itemPreparation.text = "Boil 1 cup of chopped leaves in 2 cups of water until the water is reduced to half."
+                itemWarning.text = "Consult a doctor if symptoms persist beyond 3 days."
+                itemLocation.text = "Grows wild in waste places and is often planted in gardens."
+            }
+            "Niyog-Niyogan" -> {
+                itemDiseases.text = "Treats: Intestinal Worms (Ascariasis)."
+                itemDefinition.text = "A climbing vine known as the 'Chinese Honeysuckle'."
+                itemPreparation.text = "Eat the seeds (dried) two hours after dinner. (Adults: 8-10 seeds; Children 4-7: 4-5 seeds)."
+                itemWarning.text = "Hiccups may occur if too many seeds are eaten."
+                itemLocation.text = "Grows wild in the Philippines and is often used as an ornamental plant."
+            }
+            "Pancit-Pancitan" -> {
+                itemDiseases.text = "Treats: Gout, Arthritis, Skin Inflammation."
+                itemDefinition.text = "A heart-shaped, fleshy-leafed herb that lowers uric acid levels."
+                itemPreparation.text = "Can be eaten as a fresh salad or boiled as tea."
+                itemWarning.text = "Ensure the plant is washed thoroughly if eaten raw."
+                itemLocation.text = "Commonly grows in damp, shaded areas and stone walls."
+            }
+            "Sambong" -> {
+                itemDiseases.text = "Treats: Kidney Stones (Edema), Hypertension."
+                itemDefinition.text = "A tall herb that acts as a powerful diuretic."
+                itemPreparation.text = "Boil leaves and drink as tea to help flush out small kidney stones."
+                itemWarning.text = "Not for patients with kidney failure or heart disease-related edema."
+                itemLocation.text = "Abundant in open fields and mountain slopes."
+            }
+            "Tsaang-Gubat" -> {
+                itemDiseases.text = "Treats: Stomach Ache, Diarrhea, Abdominal Pain."
+                itemDefinition.text = "A small tree used traditionally as a general health tonic and stomach medicine."
+                itemPreparation.text = "Boil leaves in water for 15 minutes. Drink while warm."
+                itemWarning.text = "Safe for general use, but seek medical help for severe dehydration."
+                itemLocation.text = "Found in dry thickets and secondary forests."
+            }
+            "Yerba Buena" -> {
+                itemDiseases.text = "Treats: Body Aches, Headache, Toothache, Cough."
+                itemDefinition.text = "A creeping mint plant used as a natural analgesic (painkiller)."
+                itemPreparation.text = "Crush leaves and apply to the forehead for headaches, or boil as tea for body pain."
+                itemWarning.text = "Avoid using the concentrated oil directly on small children."
+                itemLocation.text = "Thrives in high altitudes but can be grown in pots in lowlands."
+            }
+            else -> {
+                itemDiseases.text = "Specific usage data not found."
+                itemDefinition.text = "Details currently unavailable."
+            }
+        }
+    }
 }   
 
 //Fourth Activity Ddi makita an saved predicted or classified photos
@@ -824,7 +681,7 @@ class Classify : BaseActivity() {
     //  Run Classification tima pag deploy san model
     private fun runPrediction(bitmap: Bitmap) {
         // 1. DECLARE THE CORRECT SIZE HERE
-        val modelInputSize = 180
+        val modelInputSize = 224
 
         val dimension = Math.min(bitmap.width, bitmap.height)
         val centerCroppedBitmap = Bitmap.createBitmap(bitmap, (bitmap.width - dimension) / 2, (bitmap.height - dimension) / 2, dimension, dimension)
@@ -839,7 +696,7 @@ class Classify : BaseActivity() {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
 
-        val model = GreenbuddyModel.newInstance(this)
+        val model = Greenbuddy.newInstance(this)
 
         // 2. Preprocess image - CHANGE 180 TO modelInputSize (160)
         val imageProcessor = ImageProcessor.Builder()
@@ -1054,7 +911,7 @@ class ScannerActivity : BaseActivity() {
     private lateinit var bottomCard: androidx.cardview.widget.CardView
     private lateinit var plantName: TextView
     private lateinit var plantImage: ImageView
-    private lateinit var herbalModel: GreenbuddyModel
+    private lateinit var herbalModel: Greenbuddy
     private lateinit var objectDetector: com.google.mlkit.vision.objects.ObjectDetector
     private var herbalLabels: List<String> = emptyList()
 
@@ -1116,7 +973,7 @@ class ScannerActivity : BaseActivity() {
 
     private fun setupHerbalModel() {
         try {
-            herbalModel = GreenbuddyModel.newInstance(this)
+            herbalModel = Greenbuddy.newInstance(this)
             val options = ObjectDetectorOptions.Builder()
                 .setDetectorMode(ObjectDetectorOptions.STREAM_MODE)
                 .enableClassification()
@@ -1176,6 +1033,10 @@ class ScannerActivity : BaseActivity() {
 
     @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
     private fun processImageProxy(imageProxy: ImageProxy) {
+        if (!::objectDetector.isInitialized) {
+            imageProxy.close()
+            return
+        }
         val mediaImage = imageProxy.image ?: run {
             imageProxy.close()
             return
@@ -1234,7 +1095,7 @@ class ScannerActivity : BaseActivity() {
     }
 
     private fun runHerbalModel(bitmap: Bitmap) {
-        val modelInputSize = 180
+        val modelInputSize = 224
 
         // Square crop to match model expectations
         val dimension = Math.min(bitmap.width, bitmap.height)

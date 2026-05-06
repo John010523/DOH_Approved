@@ -37,9 +37,6 @@ android {
         mlModelBinding = true
         viewBinding = true
     }
-    aaptOptions {
-        noCompress += listOf("tflite")
-    }
     androidResources {
         noCompress("tflite")
     }
@@ -73,6 +70,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.mlkit:image-labeling-custom:17.0.1")
 
+    implementation("org.tensorflow:tensorflow-lite-select-tf-ops:2.14.0")
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
     implementation("org.tensorflow:tensorflow-lite-metadata:0.4.4")

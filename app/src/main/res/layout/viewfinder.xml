@@ -27,7 +27,7 @@
         android:id="@+id/Txtres"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="35dp"
         android:background="#80000000"
         android:padding="16dp"
         android:text="Point camera at Herbs"
