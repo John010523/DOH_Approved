@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.greenbuddy.doh_approvedherb_identifier"
+    namespace = "com.greenbuddy.doh_approved_herb_identifier"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.greenbuddy.doh_approvedherb_identifier"
+        applicationId = "com.greenbuddy.doh_approved_herb_identifier"
         minSdk = 26 // <--- Change this value
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -1,4 +1,4 @@
-package com.greenbuddy.doh_approvedherb_identifier
+package com.greenbuddy.doh_approved_herb_identifier
 import androidx.cardview.widget.CardView
 import android.os.Looper
 import com.google.mlkit.vision.objects.ObjectDetection
@@ -58,10 +58,9 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ops.ResizeOp
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import com.google.mlkit.vision.objects.defaults.ObjectDetectorOptions
-import com.greenbuddy.doh_approvedherb_identifier.NextActivity.Companion.REQUEST_CAMERA_CAPTURE
-import com.greenbuddy.doh_approvedherb_identifier.ml.Greenbuddy
+import com.greenbuddy.doh_approved_herb_identifier.NextActivity.Companion.REQUEST_CAMERA_CAPTURE
+import com.greenbuddy.doh_approved_herb_identifier.ml.Greenbuddy
 //import com.greenbuddy.doh_approvedherb_identifier.ml.GreenModel
-
 //import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalRecognationSemifi
 //import com.greenbuddy.doh_approvedherb_identifier.ml.HerbalModel
 //import com.greenbuddy.doh_approvedherb_identifier.ml.GreenbuddyModel
@@ -100,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         continuebtn = findViewById(R.id.continuebtn)
         continuebtn.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#CC47734D"))
         continuebtn.setOnClickListener {
-            val intent = Intent(this, NextActivity::class.java)
+               val intent = Intent(this, NextActivity::class.java)
             startActivity(intent)
         }
     }

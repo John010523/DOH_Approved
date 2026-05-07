@@ -57,7 +57,7 @@
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.greenbuddy.doh_approvedherb_identifier.provider"
+            android:authorities="com.greenbuddy.doh_approved_herb_identifier.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

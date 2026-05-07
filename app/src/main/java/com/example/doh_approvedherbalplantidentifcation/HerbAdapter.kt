@@ -10,7 +10,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import com.greenbuddy.doh_approvedherb_identifier.R
+import com.greenbuddy.doh_approved_herb_identifier.R
 
 class HerbAdapter(context: Context, private val items: MutableList<HerbModel>) :
     ArrayAdapter<HerbModel>(context, 0, items) {
